@@ -1,8 +1,11 @@
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
+<<<<<<< HEAD
 from sklearn.neighbors import NearestNeighbors
 
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 
 def train_test_split_by_user(ratings: pd.DataFrame, test_k: int = 5, seed: int = 42):
     rng = np.random.default_rng(seed)
@@ -13,20 +16,28 @@ def train_test_split_by_user(ratings: pd.DataFrame, test_k: int = 5, seed: int =
             train_rows.append(grp)
             continue
         test_sel = rng.choice(idx, size=test_k, replace=False)
+<<<<<<< HEAD
         mask = np.zeros(len(grp), dtype=bool)
         mask[test_sel] = True
+=======
+        mask = np.zeros(len(grp), dtype=bool); mask[test_sel] = True
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
         test_rows.append(grp[mask])
         train_rows.append(grp[~mask])
     train = pd.concat(train_rows, ignore_index=True)
     test = pd.concat(test_rows, ignore_index=True) if test_rows else pd.DataFrame(columns=ratings.columns)
     return train, test
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 def build_ui_matrix(ratings: pd.DataFrame, n_users: int, n_items: int):
     rows = ratings["user_id"].values - 1
     cols = ratings["movie_id"].values - 1
     data = ratings["rating"].values.astype(float)
     return csr_matrix((data, (rows, cols)), shape=(n_users, n_items))
+<<<<<<< HEAD
 
 
 def build_item_knn_model(train_ui, n_neighbors: int = 20, metric: str = "cosine"):
@@ -78,3 +89,5 @@ def knn_item_scores(seen_items, item_ratings, knn_model, item_matrix, n_items: i
 
     scores[list(seen_set)] = -np.inf
     return scores
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321

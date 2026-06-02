@@ -4,12 +4,19 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
 from scipy.sparse import csr_matrix
+<<<<<<< HEAD
 from utils import train_test_split_by_user, build_ui_matrix, build_item_knn_model, knn_item_scores
 
 
 def ensure_outdir(p): os.makedirs(p, exist_ok=True)
 
 
+=======
+from utils import train_test_split_by_user, build_ui_matrix
+
+def ensure_outdir(p): os.makedirs(p, exist_ok=True)
+
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 def plot_hist(ratings, outpath):
     fig, ax = plt.subplots(figsize=(6,4))
     ax.hist(ratings["rating"], bins=[0.5,1.5,2.5,3.5,4.5,5.5])
@@ -17,7 +24,10 @@ def plot_hist(ratings, outpath):
     ax.set_title("Rating distribution")
     fig.tight_layout(); fig.savefig(outpath, dpi=160); plt.close(fig)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 def top_popular(train, movies, topn=20, outpath=None):
     pop = train.groupby("movie_id")["rating"].mean().reset_index(name="avg_rating")
     pop["count"] = train.groupby("movie_id")["rating"].count().values
@@ -29,14 +39,20 @@ def top_popular(train, movies, topn=20, outpath=None):
         fig.tight_layout(); fig.savefig(outpath, dpi=160); plt.close(fig)
     return pop
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 def build_content_item_sims(movies):
     tfidf = TfidfVectorizer(token_pattern=r"[^,]+")
     X = tfidf.fit_transform(movies["genres"])
     sims = cosine_similarity(X)
     return sims, tfidf
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 def collaborative_scores(train_ui, n_components=50, seed=42):
     svd = TruncatedSVD(n_components=n_components, random_state=seed)
     U = svd.fit_transform(train_ui)
@@ -45,21 +61,31 @@ def collaborative_scores(train_ui, n_components=50, seed=42):
     scores = (U * S) @ Vt
     return scores
 
+<<<<<<< HEAD
 
 def recommend_for_user(uid, seen_items, collab_row, content_row, knn_row=None, alpha=0.6, topk=10, knn_weight=0.3):
+=======
+def recommend_for_user(uid, seen_items, collab_row, content_row, alpha=0.6, topk=10):
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
     n_items = collab_row.shape[0]
     scores = alpha * collab_row
     if content_row is not None:
         scores = scores + (1 - alpha) * content_row
+<<<<<<< HEAD
     if knn_row is not None:
         scores = scores + knn_weight * knn_row
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
     scores = scores.copy()
     scores[list(seen_items)] = -1e9
     top_idx = np.argpartition(scores, -topk)[-topk:]
     top_idx = top_idx[np.argsort(scores[top_idx])[::-1]]
     return top_idx, scores[top_idx]
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 def ndcg_at_k(recommended, relevant, k):
     dcg = 0.0
     for i, item in enumerate(recommended[:k], start=1):
@@ -68,7 +94,10 @@ def ndcg_at_k(recommended, relevant, k):
     idcg = sum(1.0 / np.log2(i + 1) for i in range(1, min(k, len(relevant)) + 1))
     return dcg / idcg if idcg > 0 else 0.0
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ratings", required=True)
@@ -76,8 +105,11 @@ def main():
     ap.add_argument("--outdir", default="outputs")
     ap.add_argument("--k", type=int, default=10)
     ap.add_argument("--alpha", type=float, default=0.6)
+<<<<<<< HEAD
     ap.add_argument("--knn_weight", type=float, default=0.3)
     ap.add_argument("--knn_neighbors", type=int, default=20)
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
@@ -97,6 +129,7 @@ def main():
     item_sims, tfidf = build_content_item_sims(movies)
     n_comp = max(2, min(50, min(train_ui.shape)-1))
     collab = collaborative_scores(train_ui, n_components=n_comp, seed=args.seed)
+<<<<<<< HEAD
     knn_model, item_matrix = build_item_knn_model(train_ui, n_neighbors=args.knn_neighbors)
 
     seen_by_user = {uid-1: set((grp["movie_id"].values - 1)) for uid, grp in train.groupby("user_id")}
@@ -105,6 +138,11 @@ def main():
         uid-1: {int(mid)-1: float(r) for mid, r in zip(grp["movie_id"].values, grp["rating"].values)}
         for uid, grp in train.groupby("user_id")
     }
+=======
+
+    seen_by_user = {uid-1: set((grp["movie_id"].values - 1)) for uid, grp in train.groupby("user_id")}
+    liked_by_user = {uid-1: set((grp.loc[grp["rating"]>=4, "movie_id"].values - 1)) for uid, grp in train.groupby("user_id")}
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 
     truth = {}
     for uid, grp in test.groupby("user_id"):
@@ -112,19 +150,29 @@ def main():
         if len(rel) > 0:
             truth[uid-1] = rel
 
+<<<<<<< HEAD
     def eval_model(alpha_use, include_knn=False):
+=======
+    def eval_model(alpha_use):
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
         precs, recs, ndcgs = [], [], []
         for u in range(n_users):
             collab_row = collab[u] if u < collab.shape[0] else np.zeros(n_items)
             liked = liked_by_user.get(u, set())
             content_row = item_sims[list(liked)].mean(axis=0) if len(liked) > 0 else None
             seen = seen_by_user.get(u, set())
+<<<<<<< HEAD
             knn_row = None
             if include_knn:
                 knn_row = knn_item_scores(seen, rating_map_by_user.get(u, {}), knn_model, item_matrix, n_items, n_neighbors=args.knn_neighbors)
             top_idx, _ = recommend_for_user(u, seen, collab_row, content_row, knn_row=knn_row, alpha=alpha_use, topk=args.k, knn_weight=args.knn_weight)
             relevant = truth.get(u, set())
             if len(relevant) == 0:
+=======
+            top_idx, _ = recommend_for_user(u, seen, collab_row, content_row, alpha=alpha_use, topk=args.k)
+            relevant = truth.get(u, set())
+            if len(relevant) == 0: 
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
                 continue
             hits = sum(1 for it in top_idx if it in relevant)
             precs.append(hits / args.k)
@@ -135,17 +183,26 @@ def main():
     p_c, r_c, n_c = eval_model(alpha_use=1.0)
     p_t, r_t, n_t = eval_model(alpha_use=0.0)
     p_h, r_h, n_h = eval_model(alpha_use=args.alpha)
+<<<<<<< HEAD
     p_k, r_k, n_k = eval_model(alpha_use=args.alpha, include_knn=True)
+=======
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
 
     metrics = {
         "k": args.k,
         "alpha": args.alpha,
+<<<<<<< HEAD
         "knn_weight": args.knn_weight,
         "knn_neighbors": args.knn_neighbors,
         "collaborative": {"precision": p_c, "recall": r_c, "ndcg": n_c},
         "content": {"precision": p_t, "recall": r_t, "ndcg": n_t},
         "hybrid": {"precision": p_h, "recall": r_h, "ndcg": n_h},
         "knn_hybrid": {"precision": p_k, "recall": r_k, "ndcg": n_k},
+=======
+        "collaborative": {"precision": p_c, "recall": r_c, "ndcg": n_c},
+        "content": {"precision": p_t, "recall": r_t, "ndcg": n_t},
+        "hybrid": {"precision": p_h, "recall": r_h, "ndcg": n_h},
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
     }
     with open(os.path.join(args.outdir, "metrics.json"), "w") as f:
         json.dump(metrics, f, indent=2)
@@ -156,8 +213,12 @@ def main():
         liked = liked_by_user.get(u, set())
         content_row = item_sims[list(liked)].mean(axis=0) if len(liked) > 0 else None
         seen = seen_by_user.get(u, set())
+<<<<<<< HEAD
         knn_row = knn_item_scores(seen, rating_map_by_user.get(u, {}), knn_model, item_matrix, n_items, n_neighbors=args.knn_neighbors)
         top_idx, scores = recommend_for_user(u, seen, collab_row, content_row, knn_row=knn_row, alpha=args.alpha, topk=args.k, knn_weight=args.knn_weight)
+=======
+        top_idx, scores = recommend_for_user(u, seen, collab_row, content_row, alpha=args.alpha, topk=args.k)
+>>>>>>> 81fb6d98d82d9e37ed32e8b71c93cb78a568f321
         titles = movies.set_index("movie_id").loc[top_idx + 1, "title"].tolist()
         with open(os.path.join(args.outdir, f"recs_user_{uid}.txt"), "w", encoding="utf-8") as f:
             for t, s in zip(titles, scores):

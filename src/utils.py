@@ -18,7 +18,11 @@ def train_test_split_by_user(ratings: pd.DataFrame, test_k: int = 5, seed: int =
         test_rows.append(grp[mask])
         train_rows.append(grp[~mask])
     train = pd.concat(train_rows, ignore_index=True)
-    test = pd.concat(test_rows, ignore_index=True) if test_rows else pd.DataFrame(columns=ratings.columns)
+    test = (
+        pd.concat(test_rows, ignore_index=True)
+        if test_rows
+        else pd.DataFrame(columns=ratings.columns)
+    )
     return train, test
 
 
@@ -30,17 +34,7 @@ def build_ui_matrix(ratings: pd.DataFrame, n_users: int, n_items: int):
 
 
 def build_item_knn_model(train_ui, n_neighbors: int = 20, metric: str = "cosine"):
-    """Fit an item-based KNN model on the item-user matrix.
-
-    Parameters
-    ----------
-    train_ui : sparse matrix
-        User-item rating matrix with shape (n_users, n_items).
-    n_neighbors : int
-        Number of neighbors to query for each item.
-    metric : str
-        Distance metric used by NearestNeighbors.
-    """
+    """Fit an item-based KNN model on the item-user matrix."""
     item_matrix = train_ui.T.tocsr()
     n_items = item_matrix.shape[0]
     if n_items == 0:
@@ -53,11 +47,7 @@ def build_item_knn_model(train_ui, n_neighbors: int = 20, metric: str = "cosine"
 
 
 def knn_item_scores(seen_items, item_ratings, knn_model, item_matrix, n_items: int, n_neighbors: int = 20):
-    """Build recommendation scores from the items a user has already rated.
-
-    seen_items is expected to be an iterable of zero-based item ids.
-    item_ratings is an optional mapping {item_id: rating} for the same items.
-    """
+    """Build recommendation scores from the items a user has already rated."""
     scores = np.zeros(n_items, dtype=float)
     if not seen_items:
         return scores
